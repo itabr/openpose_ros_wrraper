@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.7)
 project(openpose_ros_wrapper)
 
+SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
@@ -20,8 +21,8 @@ find_package(catkin REQUIRED COMPONENTS
 ) 
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(Boost REQUIRED COMPONENTS system)
+include_directories( ${Boost_INCLUDE_DIRS} )
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -218,11 +219,13 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
 find_package(GFlags)
 find_package(Glog)
-find_package(OpenCV)
+find_package(OpenCV REQUIRED)
 find_package(OpenPose REQUIRED)
 find_package(CUDA REQUIRED)
 
-include_directories(${OpenPose_INCLUDE_DIRS} ${GFLAGS_INCLUDE_DIR} ${GLOG_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS} include build/src ${CUDA_INCLUDE_DIRS})
+include_directories(${OpenPose_INCLUDE_DIRS} ${GFLAGS_INCLUDE_DIR} ${GLOG_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS} include build/src ${CUDA_INCLUDE_DIRS} ${gflags_INCLUDE_DIRS})
+
+link_directories( build/lib)
 
 add_executable( openpose_ros_wrapper apps/rtpose.cpp)
 
@@ -230,10 +233,17 @@ target_link_libraries(openpose_ros_wrapper ${OpenPose_LIBS} ${GFLAGS_LIBRARY} ${
 caffe
 glog
 gflags
+${Boost_LIBRARIES}
+${catkin_LIBRARIES}
+${OpenCV_LIBRARIES}
+${CUDA_LIBRARIES}
+${gflags_LIBRARIES}
 )
 
-add_dependencies( rtpose
+add_dependencies( openpose_ros_wrapper
     ${catkin_EXPORTED_TARGETS}
     ${PROJECT_NAME}_generate_messages_cpp
     ${PROJECT_NAME}_gencfg
 )
+
+
